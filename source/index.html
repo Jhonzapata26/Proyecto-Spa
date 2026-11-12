@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serena Centro Estetico</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🌸</div>
+            <div>
+                <h1>Serena</h1>
+                <span>Sistema de agendamiento</span>
+            </div>
+        </div>
+        <nav id="navbar" class="boton-header">
+            <a href="#">Inicio</a>
+        </nav>
+    </header>
+    <main>
+    <form class="form-grid" action="#" method="POST">
+        <h2 id="reserva" class="full">📝 Nueva reserva - Registro de cita</h2>
+        
+        <div class="form-group">
+        <label for="name">NOMBRE DEL CLIENTE</label>
+        <input type="text" id="name" name="name" required>
+        </div>
+        
+        <div class="form-group">
+        <label for="phone">TELEFONO</label>
+        <input type="tel" id="phone" name="phone" required>
+        </div>
+        
+        <!--CREAMOS LAS OPCIONES CON TODOS LOS SERVICIOS QUE SE OFRECEN EN EL CENTRO ESTETICO -->
+        <div class="form-group">
+        <label for="service">SERVICIO</label>
+        <select id="service" name="service" required>
+            <option value="">Seleccionar servicio</option>
+            <option value="manicure">Manicure</option>
+            <option value="pedicure">Pedicure</option>
+            <option value="manicure&pedicure">Manicure & Pedicure</option>
+            <option value="pestañas">Pestañas</option>
+            <option value="masaje">Masaje</option>
+            <option value="facial">Limpieza facial</option>
+            <option value="depilacion">Depilación</option>
+            <option value="maquillaje">Maquillaje</option>
+            <option value="micro">Micropigmentación</option>
+        </select>
+        </div>
+        
+        <div class="form-group">
+        <label for="manager">PROFESIONAL ENCARGADA</label>
+        <select name="manager" id="manager">
+            <option value="">Seleccionar encargada</option>
+            <option value="">Ximena</option>
+            <option value="">Maria</option>
+        </select>
+        </div>
+        
+        <div class="form-group">
+        <label for="date">FECHA</label>
+        <input type="date" id="date" name="date" required>
+        </div>
+        
+        <div class="form-group">
+        <label for="time">HORA</label>
+        <input type="time" id="time" name="time" required>
+        </div>
+        
+        <button type="submit">✅ Agendar cita</button>
+    </form>
+    <section id="day-schedule">
+        <div class="icon">⏱️</div>
+        <div class="section-header">
+            <h2>Horario del dia - lunes 09 de noviembre del 2026</h2>
+        </div>
+        <div class="time-slot">
+            <div class="time-label">9:00 AM</div>
+            <div class="time-block-empty">
+                <a>Hora disponible</a>
+            </div>
+        </div>
+        <div class="time-slot">
+            <div class="time-label">10:00 AM</div>
+            <div class="time-block-empty">
+                <a>Hora disponible</a>
+            </div>
+        </div>
+        <div class="time-slot">
+            <div class="time-label">11:00 AM</div>
+            <div class="time-block-empty">
+                <a>Hora disponible</a>
+            </div>
+        </div>
+        <div class="time-slot">
+            <div class="time-label">01:00 PM</div>
+            <div class="time-block-empty">
+                <a>Hora disponible</a>
+            </div>
+        </div>
+        <div class="time-slot">
+            <div class="time-label">02:00 PM</div>
+            <div class="time-block-empty">
+                <a>Hora disponible</a>
+            </div>
+        </div>
+        <div class="time-slot">
+            <div class="time-label">03:00 PM</div>
+            <div class="time-block-empty">
+                <a>Hora disponible</a>
+            </div>
+        </div>
+        <div class="time-slot">
+            <div class="time-label">04:00 PM</div>
+            <div class="time-block-empty">
+                <a>Hora disponible</a>
+            </div>
+        </div>
+        <div class="time-slot">
+            <div class="time-label">05:00 PM</div>
+            <div class="time-block-empty">
+                <a>Hora disponible</a>
+            </div>
+        </div>
+        <div class="time-slot">
+            <div class="time-label">06:00 PM</div>
+            <div class="time-block-empty">
+                <a>Hora disponible</a>
+            </div>
+        </div>
+    </section>
+    <section id="scheduled-appointments">
+
+    </section>
+    </main>
+</body>
+</html>
