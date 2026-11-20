@@ -21,7 +21,13 @@
     </header>
     <main>
     <form class="form-grid" action="#" method="POST">
-        <h2 id="reserva" class="full">📝 Nueva reserva - Registro de cita</h2>
+        <div class="section-header full">
+            <div class="icon">📝</div>
+            <div class="section-title">
+                <h2 id="reserva">Nueva reserva</h2>
+                <span class="section-date">Registro de cita</span>
+            </div>
+        </div>
         
         <div class="form-group">
         <label for="name">NOMBRE DEL CLIENTE</label>
@@ -72,9 +78,13 @@
         <button type="submit">✅ Agendar cita</button>
     </form>
     <section id="day-schedule">
-        <div class="icon">⏱️</div>
         <div class="section-header">
-            <h2>Horario del dia - lunes 09 de noviembre del 2026</h2>
+            <div class="icon">⏱️</div>
+            <div class="section-title">
+                <h2>Horario del día</h2>
+                <span class="section-date">Lunes 09 de noviembre del 2026</span>
+            </div>
+            <span class="slots-badge">9 disponibles</span>
         </div>
         <div class="time-slot">
             <div class="time-label">9:00 AM</div>
@@ -82,7 +92,7 @@
                 <a>Hora disponible</a>
             </div>
         </div>
-        <div class="time-slot">
+        <div class="time-slot"> 
             <div class="time-label">10:00 AM</div>
             <div class="time-block-empty">
                 <a>Hora disponible</a>
