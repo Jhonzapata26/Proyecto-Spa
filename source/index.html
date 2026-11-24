@@ -16,7 +16,11 @@
             </div>
         </div>
         <nav id="navbar" class="boton-header">
-            <a href="#">Inicio</a>
+            <div class="user-chip" id="user-chip" hidden>
+                <span class="user-name" id="user-name"></span>
+                <span class="user-role" id="user-role"></span>
+            </div>
+            <button type="button" class="logout-btn" id="logout-btn" hidden>Salir</button>
         </nav>
     </header>
     <main>
@@ -43,17 +47,9 @@
         <!--CREAMOS LAS OPCIONES CON TODOS LOS SERVICIOS QUE SE OFRECEN EN EL CENTRO ESTETICO -->
         <div class="form-group">
         <label for="service">SERVICIO</label>
+        <!-- Las opciones vienen del servidor (server/config.js) -->
         <select id="service" name="service" required>
             <option value="">Seleccionar servicio</option>
-            <option value="manicure">Manicure</option>
-            <option value="pedicure">Pedicure</option>
-            <option value="manicure-pedicure">Manicure &amp; Pedicure</option>
-            <option value="pestanas">Pestañas</option>
-            <option value="masaje">Masaje</option>
-            <option value="facial">Limpieza facial</option>
-            <option value="depilacion">Depilación</option>
-            <option value="maquillaje">Maquillaje</option>
-            <option value="micro">Micropigmentación</option>
         </select>
         </div>
         
@@ -61,8 +57,6 @@
         <label for="manager">PROFESIONAL ENCARGADA</label>
         <select name="manager" id="manager" required>
             <option value="">Seleccionar encargada</option>
-            <option value="ximena">Ximena</option>
-            <option value="maria">María</option>
         </select>
         </div>
         
@@ -184,6 +178,7 @@
     </dialog>
 
     <div id="toast" class="toast" role="status" aria-live="polite" popover="manual"></div>
+    <script src="config.js"></script>
     <script src="js/api.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/formulario.js"></script>

@@ -9,7 +9,10 @@ npm-debug.log*
 .env
 .env.*
 
-# Base de datos local (backend con SQLite)
+# Base de datos local (backend con SQLite): datos reales de clientas, nunca al repositorio
+data/
+*.db-wal
+*.db-shm
 *.sqlite
 *.sqlite3
 *.db

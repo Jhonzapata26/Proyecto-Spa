@@ -1,12 +1,21 @@
 {
   "name": "proyecto_spa",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Sistema de agendamiento de citas para Serena Centro Estético",
+  "main": "server/index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "crear-usuario": "node --disable-warning=ExperimentalWarning server/scripts/crear-usuario.js",
+    "test": "node --disable-warning=ExperimentalWarning --test \"server/test/**/*.test.js\""
+  },
+  "engines": {
+    "node": ">=22.13"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
 }

@@ -48,16 +48,24 @@ const Utils = (() => {
         return aDate(fecha, hora) <= new Date();
     }
 
-    /* ---------- Catálogos (se leen del formulario para no duplicarlos) ---------- */
+    /* ---------- Catálogos (vienen del servidor en /config.js) ---------- */
 
-    function opcionesDe(idSelect) {
-        return [...document.getElementById(idSelect).options]
-            .filter((op) => op.value)
-            .map((op) => ({ valor: op.value, nombre: op.textContent.trim() }));
+    const { SERVICIOS: servicios, PROFESIONALES: profesionales } = window.SERENA_CONFIG;
+
+    /** Agrega las opciones del catálogo a un <select> (después de su opción vacía). */
+    function llenarSelect(idSelect, lista) {
+        const select = document.getElementById(idSelect);
+        if (!select) return;
+        for (const { valor, nombre } of lista) {
+            const op = document.createElement('option');
+            op.value = valor;
+            op.textContent = nombre;
+            select.append(op);
+        }
     }
 
-    const servicios = opcionesDe('service');
-    const profesionales = opcionesDe('manager');
+    llenarSelect('service', servicios);
+    llenarSelect('manager', profesionales);
     const nombre = (lista, valor) => (lista.find((x) => x.valor === valor) || {}).nombre || valor;
 
     /* ---------- Aviso flotante ---------- */
