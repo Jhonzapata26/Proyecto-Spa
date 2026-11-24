@@ -25,7 +25,8 @@ Luego abre <http://localhost:3000> en el navegador e ingresa con el usuario crea
 | Marcar como atendida y cancelar             | ✅            | ✅             |
 | Borrar citas definitivamente                | ❌            | ✅             |
 
-Los usuarios se crean con `npm run crear-usuario`.
+Los usuarios se crean con `npm run crear-usuario`. Si alguien olvida su contraseña (o la creó mal),
+se cambia con `npm run cambiar-clave`, que además muestra la lista de usuarios registrados.
 
 ## Configuración
 
@@ -57,7 +58,7 @@ server/          servidor (Express + SQLite)
   reservas.js    reglas de negocio de las citas
   auth.js        usuarios, contraseñas y sesiones
   app.js         rutas de la API
-  scripts/       crear-usuario
+  scripts/       crear-usuario y cambiar-clave
   test/          pruebas de la API
 source/          página web (HTML, CSS y JavaScript sin frameworks)
 data/            base de datos (no se sube al repositorio)

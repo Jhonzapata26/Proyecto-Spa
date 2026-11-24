@@ -11,7 +11,7 @@ Sistema web de agendamiento de citas para **Serena Centro Estético**. Corre en 
   - `reservas.js` – reglas de negocio; el servidor es la autoridad (valida todo, no confía en el navegador).
   - `auth.js` – usuarios (scrypt), sesiones (token en cookie HttpOnly + SameSite=Strict; en BD solo el hash), bloqueo tras 5 intentos fallidos por IP, `requiereSesion` y `requiereRol`.
   - `app.js` – rutas; `crearApp(db)` separado de `index.js` para probar sin abrir puerto.
-  - `scripts/crear-usuario.js` – `npm run crear-usuario`.
+  - `scripts/crear-usuario.js` – `npm run crear-usuario`; `scripts/cambiar-clave.js` – `npm run cambiar-clave` (lista usuarios, cambia la contraseña y cierra sus sesiones). Ambos usan `scripts/consola.js` (preguntas por consola, contraseña oculta).
   - `test/api.test.js` – `npm test` (node:test, BD en memoria).
 - **API** (todas bajo `/api`, JSON; errores como `{ codigo, mensaje }`):
   - `POST/GET/DELETE /sesion` (ingresar / usuario actual / salir).

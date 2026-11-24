@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning server/index.js",
     "crear-usuario": "node --disable-warning=ExperimentalWarning server/scripts/crear-usuario.js",
+    "cambiar-clave": "node --disable-warning=ExperimentalWarning server/scripts/cambiar-clave.js",
     "test": "node --disable-warning=ExperimentalWarning --test \"server/test/**/*.test.js\""
   },
   "engines": {

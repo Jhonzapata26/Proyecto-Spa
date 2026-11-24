@@ -63,6 +63,9 @@ function crearServicioAuth(db) {
             FROM sesiones s JOIN usuarios u ON u.id = s.usuario_id
             WHERE s.token_hash = ? AND s.expira_en > ? AND u.activo = 1`),
         borrarSesion: db.prepare('DELETE FROM sesiones WHERE token_hash = ?'),
+        borrarSesionesDe: db.prepare('DELETE FROM sesiones WHERE usuario_id = ?'),
+        listarUsuarios: db.prepare('SELECT usuario, nombre, rol FROM usuarios WHERE activo = 1 ORDER BY usuario'),
+        cambiarClave: db.prepare('UPDATE usuarios SET clave_hash = ? WHERE id = ?'),
         limpiarVencidas: db.prepare('DELETE FROM sesiones WHERE expira_en <= ?'),
     };
 
@@ -104,6 +107,21 @@ function crearServicioAuth(db) {
                 throw new ErrorApp(409, 'USUARIO_EXISTE', 'Ya existe un usuario con ese nombre.');
             }
             consultas.insertarUsuario.run(usuario, nombre, rol, hashClave(clave));
+        },
+
+        listarUsuarios() {
+            return consultas.listarUsuarios.all();
+        },
+
+        /** Cambia la contraseña y cierra las sesiones abiertas de ese usuario. */
+        cambiarClave(usuario, clave) {
+            const fila = consultas.usuarioPorNombre.get(String(usuario || '').trim());
+            if (!fila) throw new ErrorApp(404, 'NO_EXISTE', `No existe el usuario "${usuario}".`);
+            if (String(clave || '').length < 8) {
+                throw new ErrorApp(400, 'DATOS_INVALIDOS', 'La contraseña debe tener al menos 8 caracteres.');
+            }
+            consultas.cambiarClave.run(hashClave(clave), fila.id);
+            consultas.borrarSesionesDe.run(fila.id);
         },
 
         hayUsuarios() {
