@@ -18,12 +18,20 @@
     let fechaActual = fechaLocal();
 
     function bloqueReservado(reserva) {
-        const bloque = el('div', 'time-block-booked');
+        const atendida = reserva.estado === 'atendida';
+        const bloque = el('button', 'time-block-booked' + (atendida ? ' time-block-booked--done' : ''));
+        bloque.type = 'button';
+        bloque.title = 'Ver detalle de la cita';
+
+        const nombre = el('strong', 'booked-name', reserva.cliente);
+        if (atendida) nombre.append(el('span', 'booked-tag', '✓ Atendida'));
+
         bloque.append(
-            el('strong', 'booked-name', reserva.cliente),
+            nombre,
             el('span', 'booked-detail',
                 `${nombreServicio(reserva.servicio)} · ${nombreProfesional(reserva.profesional)}`),
         );
+        bloque.addEventListener('click', () => emitir('reserva:abrir', { id: reserva.id }));
         return bloque;
     }
 

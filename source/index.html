@@ -109,12 +109,87 @@
         <ul id="appointments-list" class="appointments-list"></ul>
     </section>
     </main>
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <!-- Detalle de una cita: ver, editar, cerrar, cancelar y borrar -->
+    <dialog id="appointment-dialog" class="dialog" aria-labelledby="detail-title">
+        <div class="dialog-body">
+            <div class="section-header">
+                <div class="icon">🗓️</div>
+                <div class="section-title">
+                    <h2 id="detail-title">Detalle de la cita</h2>
+                    <span class="section-date" id="detail-subtitle"></span>
+                </div>
+                <span class="status-badge" id="detail-status"></span>
+                <button type="button" class="dialog-close" id="detail-close" aria-label="Cerrar">✕</button>
+            </div>
+
+            <div id="detail-view">
+                <dl class="detail-list" id="detail-data"></dl>
+                <p class="detail-note" id="detail-note" hidden></p>
+                <div class="dialog-actions">
+                    <button type="button" class="btn btn--primary" id="detail-attend">✔ Marcar atendida</button>
+                    <button type="button" class="btn" id="detail-edit">✏️ Editar</button>
+                    <button type="button" class="btn" id="detail-goto">Ver en el horario</button>
+                </div>
+                <div class="dialog-actions dialog-actions--secondary">
+                    <button type="button" class="btn btn--danger-outline" id="detail-cancel">Cancelar cita</button>
+                    <button type="button" class="btn btn--link-danger" id="detail-delete">🗑️ Borrar</button>
+                </div>
+            </div>
+
+            <form id="edit-form" class="form-grid edit-form" novalidate hidden>
+                <div class="form-group">
+                    <label for="edit-name">NOMBRE DEL CLIENTE</label>
+                    <input type="text" id="edit-name" autocomplete="off" maxlength="60" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-phone">TELÉFONO</label>
+                    <input type="tel" id="edit-phone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10"
+                        title="Número de 10 dígitos, sin espacios" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-service">SERVICIO</label>
+                    <select id="edit-service" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-manager">PROFESIONAL ENCARGADA</label>
+                    <select id="edit-manager" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-date">FECHA</label>
+                    <input type="date" id="edit-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-time">HORA</label>
+                    <select id="edit-time" required></select>
+                </div>
+                <div class="dialog-actions full">
+                    <button type="button" class="btn" id="edit-back">Volver</button>
+                    <button type="submit" class="btn btn--primary">Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <!-- Segunda confirmación para acciones delicadas -->
+    <dialog id="confirm-dialog" class="dialog dialog--small" aria-labelledby="confirm-title">
+        <div class="dialog-body">
+            <h2 id="confirm-title" class="confirm-title"></h2>
+            <p id="confirm-message" class="confirm-message"></p>
+            <div class="dialog-actions">
+                <button type="button" class="btn" id="confirm-no">No, volver</button>
+                <button type="button" class="btn btn--primary" id="confirm-yes"></button>
+            </div>
+        </div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" popover="manual"></div>
     <script src="js/api.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/formulario.js"></script>
     <script src="js/horario.js"></script>
     <script src="js/citas.js"></script>
+    <script src="js/detalle.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

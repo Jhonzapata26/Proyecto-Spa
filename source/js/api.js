@@ -54,22 +54,28 @@ const ReservasAPI = (() => {
             .sort(ordenarPorFechaYHora);
     }
 
-    /** Citas pendientes (estado "agendada") desde una fecha/hora en adelante, ordenadas. */
-    async function listarDesde(fecha, hora = '00:00') {
-        const desde = fecha + hora;
+    /** Citas pendientes (estado "agendada"), ordenadas. Incluye las que ya pasaron sin cerrarse. */
+    async function listarPendientes() {
         return leer()
-            .filter((r) => r.estado === 'agendada' && r.fecha + r.hora >= desde)
+            .filter((r) => r.estado === 'agendada')
             .sort(ordenarPorFechaYHora);
     }
 
-    /** Horas ya tomadas por una profesional en una fecha (YYYY-MM-DD). */
-    async function horasOcupadas(fecha, profesional) {
+    async function obtener(id) {
+        const reserva = leer().find((r) => r.id === id);
+        if (!reserva) throw new ErrorReserva('NO_EXISTE', 'La cita ya no existe. Pudo haber sido borrada.');
+        return reserva;
+    }
+
+    /** Horas ya tomadas por una profesional en una fecha. `excluirId` sirve al editar una cita. */
+    async function horasOcupadas(fecha, profesional, excluirId = null) {
         return leer()
-            .filter((r) => estaActiva(r) && r.fecha === fecha && r.profesional === profesional)
+            .filter((r) => estaActiva(r) && r.id !== excluirId && r.fecha === fecha && r.profesional === profesional)
             .map((r) => r.hora);
     }
 
-    async function crear(datos) {
+    /** Limpia y valida los datos de una cita; lanza ErrorReserva si algo falla. */
+    function validar(datos, reservas, excluirId = null) {
         const reserva = {
             cliente: String(datos.cliente || '').trim(),
             telefono: String(datos.telefono || '').trim(),
@@ -87,9 +93,9 @@ const ReservasAPI = (() => {
             throw new ErrorReserva('DATOS_INVALIDOS', 'La hora elegida no está dentro del horario de atención.');
         }
 
-        const reservas = leer();
         const choca = reservas.some((r) =>
             estaActiva(r) &&
+            r.id !== excluirId &&
             r.fecha === reserva.fecha &&
             r.hora === reserva.hora &&
             r.profesional === reserva.profesional
@@ -97,10 +103,14 @@ const ReservasAPI = (() => {
         if (choca) {
             throw new ErrorReserva('HORA_OCUPADA', 'Esa hora ya está reservada para esta profesional.');
         }
+        return reserva;
+    }
 
+    async function crear(datos) {
+        const reservas = leer();
         const nueva = {
             id: generarId(),
-            ...reserva,
+            ...validar(datos, reservas),
             estado: 'agendada',
             creadaEn: new Date().toISOString(),
         };
@@ -109,5 +119,59 @@ const ReservasAPI = (() => {
         return nueva;
     }
 
-    return { HORAS, ErrorReserva, listar, listarDelDia, listarDesde, horasOcupadas, crear };
+    function buscarPendiente(reservas, id) {
+        const reserva = reservas.find((r) => r.id === id);
+        if (!reserva) throw new ErrorReserva('NO_EXISTE', 'La cita ya no existe. Pudo haber sido borrada.');
+        if (reserva.estado !== 'agendada') {
+            throw new ErrorReserva('NO_EDITABLE', `La cita ya está ${reserva.estado} y no se puede cambiar.`);
+        }
+        return reserva;
+    }
+
+    /** Modifica los datos de una cita pendiente (reagendar, corregir nombre, etc.). */
+    async function actualizar(id, datos) {
+        const reservas = leer();
+        const reserva = buscarPendiente(reservas, id);
+        Object.assign(reserva, validar({ ...reserva, ...datos }, reservas, id), {
+            modificadaEn: new Date().toISOString(),
+        });
+        escribir(reservas);
+        return reserva;
+    }
+
+    /** Cancela una cita pendiente: queda en el historial y la hora se libera. */
+    async function cancelar(id) {
+        const reservas = leer();
+        const reserva = buscarPendiente(reservas, id);
+        reserva.estado = 'cancelada';
+        reserva.canceladaEn = new Date().toISOString();
+        escribir(reservas);
+        return reserva;
+    }
+
+    /** Cierra el servicio: marca la cita como atendida. */
+    async function marcarAtendida(id) {
+        const reservas = leer();
+        const reserva = buscarPendiente(reservas, id);
+        reserva.estado = 'atendida';
+        reserva.atendidaEn = new Date().toISOString();
+        escribir(reservas);
+        return reserva;
+    }
+
+    /** Borra la cita del sistema de forma permanente. */
+    async function borrar(id) {
+        const reservas = leer();
+        const restantes = reservas.filter((r) => r.id !== id);
+        if (restantes.length === reservas.length) {
+            throw new ErrorReserva('NO_EXISTE', 'La cita ya no existe. Pudo haber sido borrada.');
+        }
+        escribir(restantes);
+    }
+
+    return {
+        HORAS, ErrorReserva,
+        listar, listarDelDia, listarPendientes, obtener, horasOcupadas,
+        crear, actualizar, cancelar, marcarAtendida, borrar,
+    };
 })();

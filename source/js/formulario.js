@@ -2,7 +2,7 @@
    Formulario "Nueva reserva"
    ========================================================= */
 (() => {
-    const { fechaLocal, formatoHora, yaPaso, mostrarAviso, emitir, escuchar } = Utils;
+    const { fechaLocal, llenarHoras, mostrarAviso, emitir, escuchar } = Utils;
 
     const form = document.getElementById('booking-form');
     const campoNombre = document.getElementById('name');
@@ -16,52 +16,14 @@
     // Hora sugerida desde el horario mientras falta elegir la profesional.
     let horaPendiente = null;
 
-    function opcion(valor, texto, deshabilitada = false) {
-        const op = document.createElement('option');
-        op.value = valor;
-        op.textContent = texto;
-        op.disabled = deshabilitada;
-        return op;
-    }
-
     async function actualizarHoras() {
         const fecha = campoFecha.value;
         const profesional = campoProfesional.value;
-        const seleccionPrevia = campoHora.value;
-
-        if (!fecha || !profesional) {
-            campoHora.replaceChildren(opcion('', 'Elige fecha y profesional'));
-            campoHora.disabled = true;
-            return;
-        }
-
-        const ocupadas = await ReservasAPI.horasOcupadas(fecha, profesional);
-        const opciones = [opcion('', 'Seleccionar hora')];
-        let libres = 0;
-
-        for (const hora of ReservasAPI.HORAS) {
-            if (ocupadas.includes(hora)) {
-                opciones.push(opcion(hora, `${formatoHora(hora)} — ocupada`, true));
-            } else if (yaPaso(fecha, hora)) {
-                opciones.push(opcion(hora, `${formatoHora(hora)} — ya pasó`, true));
-            } else {
-                opciones.push(opcion(hora, formatoHora(hora)));
-                libres++;
-            }
-        }
-
-        if (libres === 0) {
-            opciones[0].textContent = 'Sin horas disponibles';
-        }
-
-        campoHora.replaceChildren(...opciones);
-        campoHora.disabled = libres === 0;
-
         // Conservar la hora elegida (o la que llegó del horario) si sigue libre.
-        const deseada = horaPendiente || seleccionPrevia;
-        const libre = opciones.some((op) => op.value === deseada && !op.disabled);
-        campoHora.value = libre ? deseada : '';
-        horaPendiente = null;
+        const deseada = horaPendiente || campoHora.value;
+
+        await llenarHoras(campoHora, { fecha, profesional, deseada });
+        if (fecha && profesional) horaPendiente = null;
     }
 
     /* ---------- Validación ---------- */

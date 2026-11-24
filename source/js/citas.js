@@ -1,35 +1,32 @@
 /* =========================================================
-   Sección "Citas agendadas" (próximas citas)
+   Sección "Citas agendadas": citas pendientes.
+   Primero las que ya pasaron sin cerrarse ("Por cerrar"),
+   luego las próximas, de la más cercana a la más lejana.
    ========================================================= */
 (() => {
-    const { fechaLocal, formatoHora, partesFecha, nombreServicio, nombreProfesional, emitir, escuchar, el } = Utils;
+    const { formatoHora, partesFecha, yaPaso, nombreServicio, nombreProfesional, emitir, escuchar, el } = Utils;
 
     const lista = document.getElementById('appointments-list');
     const contador = document.getElementById('appointments-count');
 
-    function horaActual() {
-        const ahora = new Date();
-        return `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
-    }
-
     function tarjetaCita(reserva) {
         const { dia, mes, semana } = partesFecha(reserva.fecha);
+        const porCerrar = yaPaso(reserva.fecha, reserva.hora);
 
         const item = el('li', 'appointment');
-        const boton = el('button', 'appointment-body');
+        const boton = el('button', 'appointment-body' + (porCerrar ? ' appointment-body--overdue' : ''));
         boton.type = 'button';
-        boton.title = 'Ver en el horario del día';
-        boton.addEventListener('click', () => {
-            emitir('horario:ir-a', { fecha: reserva.fecha });
-            document.getElementById('day-schedule').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
+        boton.title = 'Ver detalle de la cita';
+        boton.addEventListener('click', () => emitir('reserva:abrir', { id: reserva.id }));
 
         const fecha = el('div', 'appointment-date');
         fecha.append(el('span', 'appointment-weekday', semana), el('strong', null, dia), el('span', null, mes));
 
         const info = el('div', 'appointment-info');
+        const nombre = el('strong', 'appointment-name', reserva.cliente);
+        if (porCerrar) nombre.append(el('span', 'booked-tag booked-tag--overdue', 'Por cerrar'));
         info.append(
-            el('strong', 'appointment-name', reserva.cliente),
+            nombre,
             el('span', 'appointment-detail',
                 `${nombreServicio(reserva.servicio)} · ${nombreProfesional(reserva.profesional)}`),
             el('span', 'appointment-phone', `📞 ${reserva.telefono}`),
@@ -41,21 +38,21 @@
     }
 
     async function pintar() {
-        const proximas = await ReservasAPI.listarDesde(fechaLocal(), horaActual());
+        const pendientes = await ReservasAPI.listarPendientes();
 
-        contador.textContent = proximas.length === 1 ? '1 cita' : `${proximas.length} citas`;
+        contador.textContent = pendientes.length === 1 ? '1 cita' : `${pendientes.length} citas`;
 
-        if (proximas.length === 0) {
+        if (pendientes.length === 0) {
             const vacio = el('li', 'appointments-empty');
             vacio.append(
                 el('span', 'appointments-empty-icon', '🗓️'),
-                el('span', null, 'No hay citas próximas. Las nuevas reservas aparecerán aquí.'),
+                el('span', null, 'No hay citas pendientes. Las nuevas reservas aparecerán aquí.'),
             );
             lista.replaceChildren(vacio);
             return;
         }
 
-        lista.replaceChildren(...proximas.map(tarjetaCita));
+        lista.replaceChildren(...pendientes.map(tarjetaCita));
     }
 
     escuchar('reservas:cambiaron', pintar);

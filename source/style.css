@@ -17,7 +17,12 @@
     /* Texto */
     --text-color: #3b3027;
     --text-muted: #8c7b6a;
-    --error-color: #a8433a;          /* terracota: avisos de error */
+    --error-color: #a8433a;          /* terracota: avisos de error, acciones peligrosas */
+    --error-soft: #f6e4e1;
+    --success-color: #5f7d4e;        /* verde oliva: cita atendida */
+    --success-soft: #e8efe0;
+    --warning-color: #a0662a;        /* ámbar: cita por cerrar */
+    --warning-soft: #f7e9d6;
 
     /* Sombras */
     --shadow-card:
@@ -38,6 +43,11 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+/* "hidden" siempre oculta, aunque la clase defina display. */
+[hidden] {
+    display: none !important;
 }
 
 body {
@@ -148,7 +158,7 @@ main {
 /* =========================================================
    Tarjetas (formulario, horario y citas comparten estilo)
    ========================================================= */
-form,
+#booking-form,
 #day-schedule,
 #scheduled-appointments {
     padding: 24px;
@@ -269,7 +279,7 @@ form,
     box-shadow: var(--focus-ring);
 }
 
-button[type="submit"] {
+#booking-form button[type="submit"] {
     grid-column: 1 / -1;
     margin-top: 4px;
     padding: 13px;
@@ -288,18 +298,18 @@ button[type="submit"] {
         background var(--transition-duration);
 }
 
-button[type="submit"]:hover {
+#booking-form button[type="submit"]:hover {
     background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
     transform: translateY(-2px);
     box-shadow: 0 12px 22px -10px rgba(139, 107, 78, 0.9);
 }
 
-button[type="submit"]:focus-visible {
+#booking-form button[type="submit"]:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
 }
 
-button[type="submit"]:disabled {
+#booking-form button[type="submit"]:disabled {
     opacity: 0.6;
     cursor: wait;
     transform: none;
@@ -317,8 +327,8 @@ button[type="submit"]:disabled {
    ========================================================= */
 .toast {
     position: fixed;
-    left: 50%;
-    bottom: 24px;
+    inset: auto auto 24px 50%;   /* anula los estilos por defecto de popover */
+    margin: 0;
     z-index: 20;
     max-width: calc(100% - 32px);
     padding: 12px 20px;
@@ -509,22 +519,61 @@ button[type="submit"]:disabled {
     background-color: var(--primary-color);
 }
 
-/* Hora reservada */
+/* Hora reservada (botón: abre el detalle) */
 .time-block-booked {
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 2px;
     padding: 10px 16px;
+    font-family: inherit;
+    text-align: left;
     background-color: var(--accent-soft);
     border: 1.5px solid var(--secondary-color);
     border-left: 5px solid var(--primary-color);
     border-radius: 14px;
+    cursor: pointer;
+    transition:
+        transform var(--transition-duration),
+        box-shadow var(--transition-duration),
+        border-color var(--transition-duration);
+}
+
+.time-block-booked:hover,
+.time-block-booked:focus-visible {
+    outline: none;
+    border-color: var(--primary-color);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-hover);
+}
+
+.time-block-booked--done {
+    background-color: var(--surface-soft);
+    border-left-color: var(--success-color);
 }
 
 .booked-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
     font-size: 14px;
     color: var(--text-color);
     overflow-wrap: anywhere;
+}
+
+.booked-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: var(--success-color);
+    background-color: var(--success-soft);
+}
+
+.booked-tag--overdue {
+    color: var(--warning-color);
+    background-color: var(--warning-soft);
 }
 
 .booked-detail {
@@ -578,6 +627,11 @@ button[type="submit"]:disabled {
     border-color: var(--primary-color);
     transform: translateY(-2px);
     box-shadow: var(--shadow-hover);
+}
+
+.appointment-body--overdue {
+    border-color: var(--warning-soft);
+    border-left: 5px solid var(--warning-color);
 }
 
 .appointment-date {
@@ -650,6 +704,221 @@ button[type="submit"]:disabled {
 }
 
 /* =========================================================
+   Botones genéricos
+   ========================================================= */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--primary-color);
+    background-color: var(--accent-soft);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-field);
+    cursor: pointer;
+    transition:
+        background-color var(--transition-duration),
+        color var(--transition-duration),
+        border-color var(--transition-duration),
+        transform var(--transition-duration);
+}
+
+.btn:hover:not(:disabled) {
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn--primary {
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary-color), #a6845f);
+    border-color: transparent;
+}
+
+.btn--primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+    border-color: transparent;
+}
+
+.btn--danger {
+    color: #fff;
+    background-color: var(--error-color);
+    border-color: transparent;
+}
+
+.btn--danger:hover:not(:disabled) {
+    border-color: transparent;
+    filter: brightness(0.92);
+}
+
+.btn--danger-outline {
+    color: var(--error-color);
+    background-color: var(--surface);
+    border-color: var(--error-soft);
+}
+
+.btn--danger-outline:hover:not(:disabled) {
+    background-color: var(--error-soft);
+    border-color: var(--error-color);
+}
+
+.btn--link-danger {
+    color: var(--text-muted);
+    background: none;
+    border-color: transparent;
+}
+
+.btn--link-danger:hover:not(:disabled) {
+    color: var(--error-color);
+    border-color: transparent;
+}
+
+/* =========================================================
+   Diálogos (detalle de cita y confirmación)
+   ========================================================= */
+.dialog {
+    width: min(560px, calc(100% - 32px));
+    max-height: calc(100% - 32px);
+    margin: auto;
+    padding: 0;
+    color: var(--text-color);
+    background: linear-gradient(180deg, var(--surface-soft) 0%, var(--surface) 120px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-card);
+    box-shadow: 0 24px 60px -20px rgba(59, 48, 39, 0.45);
+}
+
+.dialog--small {
+    width: min(420px, calc(100% - 32px));
+}
+
+.dialog::backdrop {
+    background-color: rgba(59, 48, 39, 0.35);
+    backdrop-filter: blur(3px);
+}
+
+.dialog-body {
+    padding: 24px;
+}
+
+.dialog-close {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.dialog-close:hover,
+.dialog-close:focus-visible {
+    outline: none;
+    color: var(--primary-color);
+    background-color: var(--accent-soft);
+    border-color: var(--border-color);
+}
+
+.status-badge {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: var(--primary-color);
+    background-color: var(--accent-soft);
+}
+
+.status-badge--atendida {
+    color: var(--success-color);
+    background-color: var(--success-soft);
+}
+
+.status-badge--cancelada {
+    color: var(--error-color);
+    background-color: var(--error-soft);
+}
+
+.detail-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 18px;
+    margin: 12px 0 4px;
+    font-size: 14px;
+}
+
+.detail-list dt {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-top: 1px;
+}
+
+.detail-list dd {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.detail-note {
+    margin-top: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    background-color: var(--accent-soft);
+    border-radius: var(--radius-field);
+}
+
+.dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+#detail-view .dialog-actions:not(.dialog-actions--secondary) {
+    justify-content: flex-start;
+}
+
+.dialog-actions--secondary {
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.edit-form {
+    margin-top: 12px;
+}
+
+.confirm-title {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.confirm-message {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* =========================================================
    Móvil
    ========================================================= */
 @media (max-width: 600px) {
@@ -663,9 +932,13 @@ button[type="submit"]:disabled {
 }
 
 @media (max-width: 480px) {
-    form,
+    #booking-form,
     #day-schedule,
     #scheduled-appointments {
+        padding: 18px;
+    }
+
+    .dialog-body {
         padding: 18px;
     }
 

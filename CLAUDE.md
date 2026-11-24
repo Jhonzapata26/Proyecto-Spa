@@ -11,8 +11,13 @@ Sistema web de agendamiento de citas para **Serena Centro Estético**.
   - `source/js/api.js` – capa de datos (`ReservasAPI`): hoy guarda en `localStorage`; las funciones devuelven promesas para cambiarlas luego por `fetch` al backend sin tocar el resto. Define las franjas `HORAS`.
   - `source/js/utils.js` – `Utils`: fechas/horas, catálogos (servicios y profesionales se leen de los `<select>` del formulario), aviso (toast), `el()` para crear nodos con `textContent` (nunca `innerHTML` con datos de clientas) y eventos entre secciones.
   - `source/js/formulario.js` – formulario: validación, horas disponibles, prellenado desde el horario.
-  - `source/js/horario.js` – tarjeta "Horario del día": navegación entre días, reservas por hora, cupos libres; clic en hora libre prellena el formulario.
-  - `source/js/citas.js` – sección "Citas agendadas": próximas citas (estado `agendada`); clic lleva al día en el horario.
+  - `source/js/horario.js` – tarjeta "Horario del día": navegación entre días, reservas por hora (las atendidas con etiqueta), cupos libres; clic en hora libre prellena el formulario, clic en reserva abre el detalle.
+  - `source/js/citas.js` – sección "Citas agendadas": todas las citas pendientes (estado `agendada`); las que ya pasaron sin cerrarse salen primero con etiqueta "Por cerrar". Clic abre el detalle.
+  - `source/js/detalle.js` – diálogo de la cita (`<dialog>`): ver, editar, marcar atendida, cancelar y borrar. Se abre con el evento `reserva:abrir`.
+- Estados de una cita: `agendada` → `atendida` (cerrar servicio, solo desde el día de la cita) o `cancelada` (queda en historial y libera la hora). Solo las `agendada` se editan. Borrar elimina la cita definitivamente.
+- Cancelar y borrar piden segunda confirmación (`Utils.confirmar`); editar avisa que se reemplazan los datos (HU #06).
+- El aviso (toast) es un `popover` para verse por encima de los diálogos abiertos.
+- Ojo: el evento `close` de `<dialog>` llega con retraso; no limpiar estado en él si el diálogo ya se reabrió.
   - `source/js/app.js` – refresco automático cada 5 min, al volver a la pestaña y con cambios de otra pestaña.
 - Las secciones se comunican con eventos en `document` (`Utils.emitir/escuchar`): `reservas:cambiaron`, `reserva:prellenar`, `horario:ir-a`. Orden de scripts en `index.html`: api → utils → secciones → app.
 - Regla de doble reserva: una hora queda ocupada **por profesional** (Ximena y María pueden atender a la misma hora). Las reservas canceladas no ocupan.
@@ -74,6 +79,6 @@ Sistema web de agendamiento de citas para **Serena Centro Estético**.
 - [x] Corregir los `value=""` vacíos en el select de profesionales del formulario.
 - [x] Construir la sección de citas agendadas.
 - [x] Hacer dinámica la tarjeta "Horario del día" con las reservas guardadas.
-- [ ] Editar, cancelar, borrar y cerrar citas.
+- [x] Editar, cancelar, borrar y cerrar citas.
 - [ ] Backend (Node + Express + SQLite) reemplazando `api.js`.
 - [x] Calcular dinámicamente el contador y la fecha de la tarjeta del horario.

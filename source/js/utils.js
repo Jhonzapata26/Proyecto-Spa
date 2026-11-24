@@ -63,17 +63,105 @@ const Utils = (() => {
     /* ---------- Aviso flotante ---------- */
 
     const aviso = document.getElementById('toast');
+    // Como popover el aviso va en la capa superior, por encima de los diálogos abiertos.
+    const usaPopover = typeof aviso.showPopover === 'function';
     let temporizadorAviso;
     function mostrarAviso(mensaje, tipo = 'ok') {
-        aviso.textContent = mensaje;
-        aviso.className = `toast toast--${tipo} is-visible`;
         clearTimeout(temporizadorAviso);
-        temporizadorAviso = setTimeout(() => aviso.classList.remove('is-visible'), 4000);
+        aviso.textContent = mensaje;
+        aviso.className = `toast toast--${tipo}`;
+        if (usaPopover) {
+            // Volver a abrirlo lo deja encima de un diálogo abierto después.
+            if (aviso.matches(':popover-open')) aviso.hidePopover();
+            aviso.showPopover();
+        }
+        requestAnimationFrame(() => requestAnimationFrame(() => aviso.classList.add('is-visible')));
+        temporizadorAviso = setTimeout(() => {
+            aviso.classList.remove('is-visible');
+            if (usaPopover) temporizadorAviso = setTimeout(() => aviso.hidePopover(), 300);
+        }, 4000);
+    }
+
+    /* ---------- Lista de horas de un <select> ---------- */
+
+    function opcion(valor, texto, deshabilitada = false) {
+        const op = document.createElement('option');
+        op.value = valor;
+        op.textContent = texto;
+        op.disabled = deshabilitada;
+        return op;
+    }
+
+    /**
+     * Llena un <select> con las franjas del día: las ocupadas y las pasadas quedan deshabilitadas.
+     * `deseada` se selecciona si está libre; `excluirId` ignora esa cita (al editarla).
+     */
+    async function llenarHoras(select, { fecha, profesional, deseada = '', excluirId = null }) {
+        if (!fecha || !profesional) {
+            select.replaceChildren(opcion('', 'Elige fecha y profesional'));
+            select.disabled = true;
+            return;
+        }
+
+        const ocupadas = await ReservasAPI.horasOcupadas(fecha, profesional, excluirId);
+        const opciones = [opcion('', 'Seleccionar hora')];
+        let libres = 0;
+
+        for (const hora of ReservasAPI.HORAS) {
+            if (ocupadas.includes(hora)) {
+                opciones.push(opcion(hora, `${formatoHora(hora)} — ocupada`, true));
+            } else if (yaPaso(fecha, hora)) {
+                opciones.push(opcion(hora, `${formatoHora(hora)} — ya pasó`, true));
+            } else {
+                opciones.push(opcion(hora, formatoHora(hora)));
+                libres++;
+            }
+        }
+
+        if (libres === 0) opciones[0].textContent = 'Sin horas disponibles';
+
+        select.replaceChildren(...opciones);
+        select.disabled = libres === 0;
+        select.value = opciones.some((op) => op.value === deseada && !op.disabled) ? deseada : '';
+    }
+
+    /* ---------- Confirmación (segunda confirmación antes de acciones delicadas) ---------- */
+
+    const dialogoConfirmar = document.getElementById('confirm-dialog');
+    const confirmarTitulo = document.getElementById('confirm-title');
+    const confirmarMensaje = document.getElementById('confirm-message');
+    const confirmarSi = document.getElementById('confirm-yes');
+    const confirmarNo = document.getElementById('confirm-no');
+
+    /** Muestra un diálogo y resuelve true si la persona confirma. */
+    function confirmar({ titulo, mensaje, textoSi = 'Sí, continuar', peligro = false }) {
+        confirmarTitulo.textContent = titulo;
+        confirmarMensaje.textContent = mensaje;
+        confirmarSi.textContent = textoSi;
+        confirmarSi.className = peligro ? 'btn btn--danger' : 'btn btn--primary';
+
+        return new Promise((resolver) => {
+            const cerrar = (respuesta) => {
+                confirmarSi.removeEventListener('click', si);
+                confirmarNo.removeEventListener('click', no);
+                dialogoConfirmar.removeEventListener('cancel', no);
+                dialogoConfirmar.close();
+                resolver(respuesta);
+            };
+            const si = () => cerrar(true);
+            const no = (e) => { if (e) e.preventDefault(); cerrar(false); };
+            confirmarSi.addEventListener('click', si);
+            confirmarNo.addEventListener('click', no);
+            dialogoConfirmar.addEventListener('cancel', no); // tecla Esc
+            dialogoConfirmar.showModal();
+            confirmarNo.focus(); // por seguridad, el foco queda en "No"
+        });
     }
 
     /* ---------- Eventos entre secciones ---------- */
     // 'reservas:cambiaron'  -> hay que volver a pintar los datos
     // 'reserva:prellenar'   -> { fecha, hora, profesional } para el formulario
+    // 'reserva:abrir'       -> { id } abre el detalle de una cita
     // 'horario:ir-a'        -> { fecha } para la tarjeta del horario
 
     function emitir(nombreEvento, detalle) {
@@ -97,6 +185,6 @@ const Utils = (() => {
         profesionales,
         nombreServicio: (valor) => nombre(servicios, valor),
         nombreProfesional: (valor) => nombre(profesionales, valor),
-        mostrarAviso, emitir, escuchar, el,
+        llenarHoras, confirmar, mostrarAviso, emitir, escuchar, el,
     };
 })();
