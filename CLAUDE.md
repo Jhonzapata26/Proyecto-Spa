@@ -4,10 +4,19 @@ Sistema web de agendamiento de citas para **Serena Centro Estético**.
 
 ## Estado actual
 
-- Proyecto frontend estático: HTML + CSS puro, sin frameworks ni JavaScript todavía.
+- Frontend HTML + CSS + JavaScript puro (sin frameworks, sin módulos ES para que funcione abriendo el archivo directo).
 - Archivos:
   - `source/index.html` – página principal.
   - `source/style.css` – estilos globales (variables en `:root`).
+  - `source/js/api.js` – capa de datos (`ReservasAPI`): hoy guarda en `localStorage`; las funciones devuelven promesas para cambiarlas luego por `fetch` al backend sin tocar el resto. Define las franjas `HORAS`.
+  - `source/js/utils.js` – `Utils`: fechas/horas, catálogos (servicios y profesionales se leen de los `<select>` del formulario), aviso (toast), `el()` para crear nodos con `textContent` (nunca `innerHTML` con datos de clientas) y eventos entre secciones.
+  - `source/js/formulario.js` – formulario: validación, horas disponibles, prellenado desde el horario.
+  - `source/js/horario.js` – tarjeta "Horario del día": navegación entre días, reservas por hora, cupos libres; clic en hora libre prellena el formulario.
+  - `source/js/citas.js` – sección "Citas agendadas": próximas citas (estado `agendada`); clic lleva al día en el horario.
+  - `source/js/app.js` – refresco automático cada 5 min, al volver a la pestaña y con cambios de otra pestaña.
+- Las secciones se comunican con eventos en `document` (`Utils.emitir/escuchar`): `reservas:cambiaron`, `reserva:prellenar`, `horario:ir-a`. Orden de scripts en `index.html`: api → utils → secciones → app.
+- Regla de doble reserva: una hora queda ocupada **por profesional** (Ximena y María pueden atender a la misma hora). Las reservas canceladas no ocupan.
+- La hora se elige en un `<select>` con las franjas; las ocupadas o pasadas aparecen deshabilitadas.
 - La página tiene cuatro bloques:
   1. **Header** con logo (🌸 Serena) y navegación (botón "Inicio").
   2. **Formulario "Nueva reserva"**: nombre del cliente, teléfono, servicio, profesional encargada, fecha y hora.
@@ -19,6 +28,27 @@ Sistema web de agendamiento de citas para **Serena Centro Estético**.
 - **Servicios:** Manicure, Pedicure, Manicure & Pedicure, Pestañas, Masaje, Limpieza facial, Depilación, Maquillaje, Micropigmentación.
 - **Profesionales:** Ximena, Maria.
 - **Horario de atención (deducido de la tarjeta, por confirmar):** franjas de 9:00 AM a 6:00 PM, sin la de 12:00 (posible almuerzo).
+
+## Requerimientos (resumen de `Documentation/Documento con Especificación de Requerimientos.pdf`)
+
+**Roles:** quien agenda es la **recepcionista** (o un colaborador); existe un **administrador** con permisos para modificar datos confirmados. La clienta no usa el sistema directamente: solo recibe mensajes por WhatsApp.
+
+**Funcionales**
+- RF1 Registrar reserva: nombre y teléfono de la clienta, servicio, fecha, hora y profesional asignada.
+- RF2 Mostrar por día las horas reservadas y con qué servicio (calendario con fechas/horas disponibles).
+- RF4 Modificar reservas: editar (fecha/hora), cancelar (con doble confirmación; la franja queda libre) y borrar. Se pueden ver reservas pasadas.
+- RF5 Cerrar el servicio (marcar la cita como atendida).
+- RF6 Impedir que se sobrescriba una cita ya agendada (sin dobles reservas). Avisar antes de reemplazar datos; bloquear a usuarios no autorizados.
+- Mensajes: "se guardó con éxito" al guardar; un aviso de error si no se puede guardar o conectar con el servidor.
+
+**Descartado por decisión del usuario (2026-11-23):** recordatorios y encuesta por WhatsApp (RF3, encuesta de RF5) y sincronización con Google Calendar. El sistema no necesita internet.
+
+**No funcionales**
+- Refrescar el calendario automáticamente (HU dice cada 10 min; HU #07 dice ≤ 5 min). Un registro nuevo se ve de inmediato. El refresco no debe interrumpir lo que el usuario está escribiendo.
+- Interfaz muy intuitiva, procesos cortos, usable también en el celular.
+- Capacidad mínima: 1000 clientas. Aplicación ligera y con poco uso de RAM.
+- Datos protegidos, cifrados y respaldados, sin pérdidas ante cortes de energía.
+- Restricciones: Windows, portátil o de mesa, idealmente portable; **base de datos local**; instalada en el equipo de recepción.
 
 ## Guía de estilo
 
@@ -36,9 +66,14 @@ Sistema web de agendamiento de citas para **Serena Centro Estético**.
 
 ## Pendiente
 
-- [ ] Documentar requisitos funcionales y no funcionales (el usuario los tiene en otro equipo).
-- [ ] Definir roles de usuario (¿quién agenda: recepción, clienta o ambas?).
-- [ ] Construir la sección de citas agendadas.
-- [ ] Agregar lógica (JavaScript / backend) para guardar reservas y marcar horas ocupadas.
-- [ ] Corregir los `value=""` vacíos en el select de profesionales del formulario.
-- [ ] Calcular dinámicamente el contador "9 disponibles" y la fecha de la tarjeta del horario.
+- [x] Documentar requisitos funcionales y no funcionales (ver sección Requerimientos).
+- [x] Definir roles de usuario: recepcionista y administrador.
+- [ ] Confirmar arquitectura propuesta: app web local (Node.js + Express + SQLite en el equipo de recepción).
+- [ ] Confirmar intervalo de refresco: se implementó 5 min (cumple la HU #07 y también la de 10 min).
+- [x] Registrar reservas (localStorage) y bloquear dobles reservas.
+- [x] Corregir los `value=""` vacíos en el select de profesionales del formulario.
+- [x] Construir la sección de citas agendadas.
+- [x] Hacer dinámica la tarjeta "Horario del día" con las reservas guardadas.
+- [ ] Editar, cancelar, borrar y cerrar citas.
+- [ ] Backend (Node + Express + SQLite) reemplazando `api.js`.
+- [x] Calcular dinámicamente el contador y la fecha de la tarjeta del horario.

@@ -1,0 +1,21 @@
+# Documentación del proyecto (no se sube al repositorio)
+Documentation/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Variables de entorno
+.env
+.env.*
+
+# Base de datos local (backend con SQLite)
+*.sqlite
+*.sqlite3
+*.db
+
+# Sistema operativo / editor
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/

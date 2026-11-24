@@ -17,6 +17,7 @@
     /* Texto */
     --text-color: #3b3027;
     --text-muted: #8c7b6a;
+    --error-color: #a8433a;          /* terracota: avisos de error */
 
     /* Sombras */
     --shadow-card:
@@ -140,15 +141,16 @@ main {
     }
 }
 
-#scheduled-appointments:empty {
-    display: none;
+#scheduled-appointments {
+    grid-column: 1 / -1;
 }
 
 /* =========================================================
-   Tarjetas (formulario y horario comparten estilo)
+   Tarjetas (formulario, horario y citas comparten estilo)
    ========================================================= */
 form,
-#day-schedule {
+#day-schedule,
+#scheduled-appointments {
     padding: 24px;
     background: linear-gradient(180deg, var(--surface-soft) 0%, var(--surface) 120px);
     border: 1px solid var(--border-color);
@@ -250,6 +252,11 @@ form,
         background-color var(--transition-duration);
 }
 
+.form-group input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.55;
+}
+
 .form-group input:hover,
 .form-group select:hover {
     border-color: var(--secondary-color);
@@ -292,6 +299,55 @@ button[type="submit"]:focus-visible {
     box-shadow: var(--focus-ring);
 }
 
+button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: wait;
+    transform: none;
+}
+
+.form-group select:disabled {
+    color: var(--text-muted);
+    background-color: var(--accent-soft);
+    border-style: dashed;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   Aviso flotante (toast)
+   ========================================================= */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 20;
+    max-width: calc(100% - 32px);
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color);
+    background-color: var(--surface);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--primary-color);
+    border-radius: var(--radius-field);
+    box-shadow: var(--shadow-card);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 16px);
+    transition:
+        opacity var(--transition-duration),
+        transform var(--transition-duration);
+}
+
+.toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.toast--error {
+    color: var(--error-color);
+    border-left-color: var(--error-color);
+}
+
 /* =========================================================
    Tarjeta: Horario del día
    ========================================================= */
@@ -301,11 +357,90 @@ button[type="submit"]:focus-visible {
     gap: 8px;
 }
 
-.time-slot {
+/* Navegación entre días */
+.day-nav {
     display: flex;
     align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.day-nav input[type="date"] {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-color);
+    background-color: var(--surface-soft);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-field);
+    outline: none;
+}
+
+.day-nav input[type="date"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: var(--focus-ring);
+}
+
+.day-nav-btn,
+.day-nav-today {
+    flex-shrink: 0;
+    height: 38px;
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--primary-color);
+    background-color: var(--accent-soft);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-field);
+    cursor: pointer;
+    transition:
+        background-color var(--transition-duration),
+        color var(--transition-duration);
+}
+
+.day-nav-btn {
+    width: 38px;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.day-nav-today {
+    padding: 0 14px;
+    font-size: 13px;
+}
+
+.day-nav-btn:hover,
+.day-nav-today:hover {
+    color: #fff;
+    background-color: var(--primary-color);
+}
+
+.day-nav-btn:focus-visible,
+.day-nav-today:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.schedule-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.time-slot {
+    display: flex;
+    align-items: flex-start;
     gap: 16px;
     padding: 4px 0;
+}
+
+.time-blocks {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .time-label {
@@ -316,11 +451,14 @@ button[type="submit"]:focus-visible {
     color: var(--text-muted);
     text-align: right;
     font-variant-numeric: tabular-nums;
+    padding-top: 13px;
 }
 
 .time-block-empty {
-    flex: 1;
     position: relative;
+    width: 100%;
+    font-family: inherit;
+    text-align: left;
     padding: 12px 16px 12px 22px;
     border: 1.5px dashed var(--secondary-color);
     border-radius: 14px;
@@ -345,13 +483,14 @@ button[type="submit"]:focus-visible {
     transform: var(--transform);
 }
 
-.time-block-empty a {
+.time-block-empty span {
     font-size: 14px;
     color: var(--text-muted);
-    text-decoration: none;
 }
 
-.time-block-empty:hover {
+.time-block-empty:hover,
+.time-block-empty:focus-visible {
+    outline: none;
     border-style: solid;
     border-color: var(--primary-color);
     background-color: var(--accent-soft);
@@ -359,13 +498,155 @@ button[type="submit"]:focus-visible {
     box-shadow: var(--shadow-hover);
 }
 
-.time-block-empty:hover a {
+.time-block-empty:hover span,
+.time-block-empty:focus-visible span {
     color: var(--primary-color);
     font-weight: 600;
 }
 
-.time-block-empty:hover::before {
+.time-block-empty:hover::before,
+.time-block-empty:focus-visible::before {
     background-color: var(--primary-color);
+}
+
+/* Hora reservada */
+.time-block-booked {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 16px;
+    background-color: var(--accent-soft);
+    border: 1.5px solid var(--secondary-color);
+    border-left: 5px solid var(--primary-color);
+    border-radius: 14px;
+}
+
+.booked-name {
+    font-size: 14px;
+    color: var(--text-color);
+    overflow-wrap: anywhere;
+}
+
+.booked-detail {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Hora que ya pasó sin reservas */
+.time-block-past {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    border: 1.5px dashed var(--border-color);
+    border-radius: 14px;
+    opacity: 0.7;
+}
+
+/* =========================================================
+   Sección: Citas agendadas
+   ========================================================= */
+.appointments-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.appointment-body {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px 12px 12px;
+    font-family: inherit;
+    text-align: left;
+    color: var(--text-color);
+    background-color: var(--surface);
+    border: 1.5px solid var(--border-color);
+    border-radius: 18px;
+    cursor: pointer;
+    transition:
+        border-color var(--transition-duration),
+        transform var(--transition-duration),
+        box-shadow var(--transition-duration);
+}
+
+.appointment-body:hover,
+.appointment-body:focus-visible {
+    outline: none;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.appointment-date {
+    flex-shrink: 0;
+    width: 54px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--primary-color);
+    background: linear-gradient(135deg, var(--secondary-color), var(--accent-soft));
+    border-radius: 14px;
+}
+
+.appointment-date strong {
+    font-size: 20px;
+    line-height: 1.1;
+    color: var(--text-color);
+}
+
+.appointment-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.appointment-name {
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+.appointment-detail,
+.appointment-phone {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.appointment-time {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary-color);
+    background-color: var(--accent-soft);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+}
+
+.appointments-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 28px 16px;
+    font-size: 14px;
+    text-align: center;
+    color: var(--text-muted);
+    border: 1.5px dashed var(--secondary-color);
+    border-radius: 18px;
+    background-color: var(--surface-soft);
+}
+
+.appointments-empty-icon {
+    font-size: 26px;
 }
 
 /* =========================================================
@@ -383,8 +664,13 @@ button[type="submit"]:focus-visible {
 
 @media (max-width: 480px) {
     form,
-    #day-schedule {
+    #day-schedule,
+    #scheduled-appointments {
         padding: 18px;
+    }
+
+    .appointments-list {
+        grid-template-columns: 1fr;
     }
 
     .section-header {
